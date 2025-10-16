@@ -27,7 +27,6 @@ function ensureModelPart(obj, scene) {
   if (obj) return obj;
   // Create a placeholder object3D attached to scene so transforms apply
   const placeholder = { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { x: 1, y: 1, z: 1 } };
-  // scene isn't a THREE.Scene in this context; the hook owns it. We just return a compatible shape for gsap.
   return placeholder;
 }
 
@@ -46,6 +45,7 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
    * Creates the master timeline and ScrollTrigger pinning.
    * Returns a function to kill the timeline and media queries on cleanup.
    */
+  // Lazy-load GSAP on demand to reduce initial bundle/parse cost
   const { gsap, ScrollTrigger } = registerGsap();
 
   const chapters = collectChapters();
@@ -60,9 +60,7 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
   // Prefer reduced motion: disable heavy 3D timelines and pinning but keep gentle content fades
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (prefersReduced) {
-    // Minimal content visibility progression without pinning or scrubbed 3D
-    chapters.forEach((c, i) => {
-      // Start all sections transparent; fade in as they approach viewport
+    chapters.forEach((c) => {
       gsap.set(c.el, { opacity: 0, y: 16 });
       ScrollTrigger.create({
         trigger: c.el,
@@ -73,9 +71,7 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
       });
     });
     return () => {
-      // ScrollTriggers are auto-killed on refresh; no persistent timelines created here
       ScrollTrigger.getAll().forEach((st) => {
-        // only kill the ones we created for sections
         if (chapters.find((c) => c.el === st.trigger)) st.kill();
       });
     };
@@ -98,17 +94,15 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
 
   mm.add(
     {
-      // desktop first
       isDesktop: "(min-width: 1024px)",
       isTablet: "(min-width: 640px) and (max-width: 1023px)",
       isPhone: "(max-width: 639px)",
     },
     (context) => {
-      const { isDesktop, isTablet, isPhone } = context.conditions;
+      const { isDesktop, isTablet } = context.conditions;
 
-      const sectionHeightFactor = isDesktop ? 120 : isTablet ? 110 : 100; // vh per section for scroll length control
+      const sectionHeightFactor = isDesktop ? 120 : isTablet ? 110 : 100;
 
-      // Create a ScrollTrigger to pin the canvas across all sections
       const pinST = ScrollTrigger.create({
         trigger: container,
         start: "top top",
@@ -119,7 +113,6 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
         invalidateOnRefresh: true,
       });
 
-      // Build a scrubbed timeline syncing chapters
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
@@ -134,15 +127,12 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
         },
       });
 
-      // Define chapter label order based on sections order
       chapters.forEach((c, idx) => {
         tl.addLabel(c.label || c.id || `chapter-${idx}`);
       });
 
-      // Camera safe guards
       const cam = camera;
       if (cam) {
-        // Intro: move camera in slightly and ease rotation
         tl.fromTo(
           cam.position,
           { x: cam.position.x, y: cam.position.y, z: cam.position.z },
@@ -151,7 +141,6 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
         );
       }
 
-      // Deconstruct: explode parts outward
       const explodeOffset = isDesktop ? 0.6 : isTablet ? 0.5 : 0.4;
       tl.to(
         headband.position,
@@ -174,7 +163,6 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
         "design"
       );
 
-      // Features: subtle rotations to showcase surfaces
       const rotAmt = isDesktop ? 0.6 : isTablet ? 0.5 : 0.4;
       tl.to(
         root.rotation,
@@ -182,7 +170,6 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
         "performance"
       );
 
-      // Timing: camera dolly and tilt
       if (cam) {
         tl.to(
           cam.position,
@@ -191,7 +178,6 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
         );
       }
 
-      // Features: highlight one cup
       tl.to(
         leftCup.scale,
         { x: 1.15, y: 1.15, z: 1.15, duration: 1 },
@@ -203,7 +189,6 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
         "features"
       );
 
-      // Reassemble for CTA
       tl.to(
         [headband.position, leftCup.position, rightCup.position, frame.position],
         { x: 0, y: 0, z: 0, duration: 1 },
@@ -222,14 +207,11 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
         );
       }
 
-      // Keep camera looking at origin if supported; we use onUpdate to reapply lookAt in case of movement
       if (cam) {
         tl.eventCallback("onUpdate", () => {
           try {
             cam.lookAt(0, 0, 0);
-          } catch (_) {
-            // ignore
-          }
+          } catch (_) {}
           if (typeof threeApi?.requestRender === "function") threeApi.requestRender();
         });
       }
@@ -248,11 +230,8 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
 
   return () => {
     try {
-      // kill all media rules created in this call
       mm.kill();
       ctxCleanup?.();
-    } catch (_e) {
-      // ignore
-    }
+    } catch (_e) {}
   };
 }

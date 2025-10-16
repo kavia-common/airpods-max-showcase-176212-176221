@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { createRenderer, createCamera, createSceneWithLights, resizeRendererToDisplaySize, disposeSceneResources } from './sceneSetup';
+import { createRenderer, createCamera, createSceneWithLights, resizeRendererToDisplaySize, disposeSceneResources, applyEnvironmentFromPMREM } from './sceneSetup';
 import { MAX_PIXEL_RATIO } from './constants';
 import { loadAirpodsModel } from './loadModel';
 
@@ -12,12 +12,38 @@ export function useThreeAirpods({ canvasRef, modelUrl = null } = {}) {
    * - Loads model with graceful fallback
    * - Handles resize with DPR cap
    * - Runs requestAnimationFrame loop and cleans up on unmount
+   * - Pauses RAF when document is hidden (visibilitychange)
    */
   const rendererRef = useRef(null);
   const cameraRef = useRef(null);
   const sceneRef = useRef(null);
   const rafRef = useRef(0);
   const [isReady, setIsReady] = useState(false);
+
+  const startRAF = useCallback((scene, camera, renderer, modelRoot) => {
+    if (!renderer || !camera || !scene) return;
+    const clock = new THREE.Clock();
+    const animate = () => {
+      const delta = clock.getDelta();
+
+      // Tiny idle rotation for fallback demo if model name matches
+      const target = modelRoot;
+      if (target && (target.name === 'FallbackObject' || target.userData?.fallback)) {
+        target.rotation.y += delta * 0.2;
+      }
+
+      renderer.render(scene, camera);
+      rafRef.current = window.requestAnimationFrame(animate);
+    };
+    rafRef.current = window.requestAnimationFrame(animate);
+  }, []);
+
+  const stopRAF = useCallback(() => {
+    if (rafRef.current) {
+      window.cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    }
+  }, []);
 
   const init = useCallback(async () => {
     const canvas = canvasRef?.current;
@@ -44,37 +70,31 @@ export function useThreeAirpods({ canvasRef, modelUrl = null } = {}) {
       // loader already returns fallback if fails
     }
     if (modelRoot) {
+      // Ensure frustum culling is enabled for performance
+      modelRoot.traverse?.((obj) => {
+        if ('frustumCulled' in obj) obj.frustumCulled = true;
+      });
       scene.add(modelRoot);
     }
 
-    // Initial size
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
+    // Apply environment IBL if PMREM available; keep existing lights as fallback
+    applyEnvironmentFromPMREM(renderer, scene);
+
+    // Initial size with DPR cap
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO, 1.75);
+    renderer.setPixelRatio(dpr);
     renderer.setSize(rect.width || canvas.clientWidth, rect.height || canvas.clientHeight, false);
 
     setIsReady(true);
 
-    // Start RAF
-    const clock = new THREE.Clock();
-    const animate = () => {
-      const delta = clock.getDelta();
-
-      // Tiny idle rotation for fallback demo if model name matches
-      const target = modelRoot;
-      if (target && (target.name === 'FallbackObject' || target.userData?.fallback)) {
-        target.rotation.y += delta * 0.2;
-      }
-
-      renderer.render(scene, camera);
-      rafRef.current = window.requestAnimationFrame(animate);
-    };
-    rafRef.current = window.requestAnimationFrame(animate);
-  }, [canvasRef, modelUrl]);
+    startRAF(scene, camera, renderer, modelRoot);
+  }, [canvasRef, modelUrl, startRAF]);
 
   const handleResize = useCallback(() => {
     const renderer = rendererRef.current;
     const camera = cameraRef.current;
     if (!renderer || !camera) return;
-    resizeRendererToDisplaySize(renderer, camera, MAX_PIXEL_RATIO);
+    resizeRendererToDisplaySize(renderer, camera, Math.min(MAX_PIXEL_RATIO, 1.75));
   }, []);
 
   useEffect(() => {
@@ -83,18 +103,43 @@ export function useThreeAirpods({ canvasRef, modelUrl = null } = {}) {
     // Resize listener
     window.addEventListener('resize', handleResize);
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (rafRef.current) {
-        window.cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
+    // Pause RAF when tab/document is hidden for perf
+    const onVisibility = () => {
+      if (document.hidden) {
+        stopRAF();
+      } else {
+        const renderer = rendererRef.current;
+        const scene = sceneRef.current;
+        const camera = cameraRef.current;
+        // trigger a render immediately on resume and restart RAF
+        if (renderer && scene && camera) {
+          renderer.render(scene, camera);
+          startRAF(scene, camera, renderer, scene?.children?.[0]);
+        }
       }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('resize', handleResize);
+      stopRAF();
+
       // Dispose resources
       const scene = sceneRef.current;
       if (scene) {
         disposeSceneResources(scene);
+        scene.environment = null;
+        // Remove all children to allow GC
+        while (scene.children.length) {
+          scene.remove(scene.children[0]);
+        }
       }
       if (rendererRef.current) {
+        // dispose renderer and its internal render lists/RTs
+        try {
+          rendererRef.current.renderLists?.dispose?.();
+        } catch (_) {}
         rendererRef.current.dispose();
       }
       // Clear refs
@@ -103,7 +148,7 @@ export function useThreeAirpods({ canvasRef, modelUrl = null } = {}) {
       sceneRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [init]);
+  }, [init, handleResize, stopRAF, startRAF]);
 
   return {
     isReady,
