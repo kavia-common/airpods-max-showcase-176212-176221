@@ -1,0 +1,2 @@
+# Placeholder to keep the draco directory in version control.
+# Place Draco decoder files (e.g., draco_decoder.js, draco_wasm_wrapper.js, draco_decoder.wasm) here if you plan to load DRACO-compressed models from /draco/.

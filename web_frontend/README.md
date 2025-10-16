@@ -27,6 +27,28 @@ Launches the test runner in interactive watch mode.
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
+## 3D Model and Draco Assets
+
+To enable the AirPods Max 3D model:
+
+1. Place your GLB file at:
+   - `public/models/airpods-max/airpods-max.glb`
+
+2. (Optional) If your model uses DRACO compression, place the DRACO decoder files in:
+   - `public/draco/`
+   Typical files include:
+   - `draco_decoder.js`
+   - `draco_wasm_wrapper.js`
+   - `draco_decoder.wasm`
+
+3. Environment variables (optional):
+   - `REACT_APP_MODEL_BASE_URL` (default: `/models/airpods-max/airpods-max.glb`)
+   - `REACT_APP_DRACO_PATH` (default: `/draco/`)
+   Copy `.env.example` to `.env` and update if your paths differ.
+
+4. Graceful fallback:
+   - If the model is missing or fails to load, the app will render a placeholder object so the page remains functional.
+
 ## Customization
 
 ### Colors
