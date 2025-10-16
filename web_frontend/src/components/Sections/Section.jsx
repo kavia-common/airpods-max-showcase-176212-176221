@@ -48,9 +48,14 @@ export default function Section({
             </p>
           ) : null}
           {title ? (
-            <h2 id={id ? `${id}-title` : undefined} className="title">
-              {title}
-            </h2>
+            // If title is a string/number, render as h2; if it's a React node (e.g., h1), render directly
+            typeof title === 'string' || typeof title === 'number' ? (
+              <h2 id={id ? `${id}-title` : undefined} className="title">
+                {title}
+              </h2>
+            ) : (
+              title
+            )
           ) : null}
           {subtitle ? <p className="subtitle" id={`${id}-subtitle`}>{subtitle}</p> : null}
         </header>

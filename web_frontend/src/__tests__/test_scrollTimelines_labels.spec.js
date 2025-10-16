@@ -4,18 +4,23 @@ import App from '../App';
 
 // We need fine-grained control over gsap timeline to assert label registration.
 // Mock gsap and ScrollTrigger to capture calls.
-const addLabelSpy = jest.fn();
-const timelineSpy = jest.fn(() => ({
-  addLabel: addLabelSpy,
-  fromTo: jest.fn(),
-  to: jest.fn(),
-  eventCallback: jest.fn(),
-  kill: jest.fn(),
-  scrollTrigger: { kill: jest.fn() },
-}));
-const scrollTriggerCreateSpy = jest.fn(() => ({ kill: jest.fn(), trigger: null }));
+// Define spies inside the mock factory to satisfy Jest's scope rules.
+let addLabelSpyRef;
+let scrollTriggerCreateSpyRef;
 
 jest.mock('gsap', () => {
+  const addLabelSpy = jest.fn();
+  addLabelSpyRef = addLabelSpy;
+
+  const timelineSpy = jest.fn(() => ({
+    addLabel: addLabelSpy,
+    fromTo: jest.fn(),
+    to: jest.fn(),
+    eventCallback: jest.fn(),
+    kill: jest.fn(),
+    scrollTrigger: { kill: jest.fn() },
+  }));
+
   const matchMediaObj = {
     add: jest.fn((_conds, cb) => {
       // Call the callback with desktop conditions
@@ -37,8 +42,11 @@ jest.mock('gsap', () => {
 });
 
 jest.mock('gsap/ScrollTrigger', () => {
+  const createSpy = jest.fn(() => ({ kill: jest.fn(), trigger: null }));
+  // store ref for assertions outside mock
+  scrollTriggerCreateSpyRef = createSpy;
   const st = {
-    create: scrollTriggerCreateSpy,
+    create: createSpy,
     getAll: jest.fn(() => []),
     refresh: jest.fn(),
   };
@@ -81,9 +89,8 @@ beforeAll(() => {
 });
 
 afterEach(() => {
-  addLabelSpy.mockClear();
-  timelineSpy.mockClear();
-  scrollTriggerCreateSpy.mockClear();
+  addLabelSpyRef?.mockClear?.();
+  scrollTriggerCreateSpyRef?.mockClear?.();
 });
 
 test('registers scroll timeline labels for each configured section', () => {
@@ -94,12 +101,12 @@ test('registers scroll timeline labels for each configured section', () => {
   const expectedLabels = ['intro', 'design', 'performance', 'timing', 'features', 'cta'];
 
   // Collect first args of addLabel calls
-  const calls = addLabelSpy.mock.calls.map((c) => c[0]);
+  const calls = (addLabelSpyRef?.mock?.calls || []).map((c) => c[0]);
 
   expectedLabels.forEach((label) => {
     expect(calls).toContain(label);
   });
 
   // Ensure the pin ScrollTrigger was created for container pinning
-  expect(scrollTriggerCreateSpy).toHaveBeenCalled();
+  expect(scrollTriggerCreateSpyRef).toHaveBeenCalled();
 });

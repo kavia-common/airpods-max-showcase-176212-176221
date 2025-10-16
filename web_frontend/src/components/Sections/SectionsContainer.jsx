@@ -18,10 +18,13 @@ export default function SectionsContainer() {
     // Defer timeline creation until after mount to ensure DOM elements exist.
     // The Three API is accessed via a window-shared reference set by ThreeCanvas.
     // This avoids prop drilling and keeps the API decoupled.
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mm = typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)')
+      : { matches: false };
+    const prefersReduced = !!mm.matches;
 
     if (!prefersReduced) {
-      const threeApi = window.__threeAirpodsApi || null;
+      const threeApi = typeof window !== 'undefined' ? (window.__threeAirpodsApi || null) : null;
       cleanupRef.current = createMasterTimeline({ threeApi });
     }
 
