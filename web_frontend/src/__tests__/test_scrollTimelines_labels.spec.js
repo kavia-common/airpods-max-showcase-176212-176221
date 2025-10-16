@@ -8,12 +8,13 @@ import App from '../App';
 let addLabelSpyRef;
 let scrollTriggerCreateSpyRef;
 
-jest.mock('gsap', () => {
-  const addLabelSpy = jest.fn();
-  addLabelSpyRef = addLabelSpy;
+// Create the spies that will be assigned to refs
+const mockAddLabelSpy = jest.fn();
+const mockScrollTriggerCreateSpy = jest.fn(() => ({ kill: jest.fn(), trigger: null }));
 
+jest.mock('gsap', () => {
   const timelineSpy = jest.fn(() => ({
-    addLabel: addLabelSpy,
+    addLabel: mockAddLabelSpy,
     fromTo: jest.fn(),
     to: jest.fn(),
     eventCallback: jest.fn(),
@@ -38,20 +39,23 @@ jest.mock('gsap', () => {
     timeline: timelineSpy,
     matchMedia: jest.fn(() => matchMediaObj),
   };
+  
   return gsap;
 });
 
 jest.mock('gsap/ScrollTrigger', () => {
-  const createSpy = jest.fn(() => ({ kill: jest.fn(), trigger: null }));
-  // store ref for assertions outside mock
-  scrollTriggerCreateSpyRef = createSpy;
   const st = {
-    create: createSpy,
+    create: mockScrollTriggerCreateSpy,
     getAll: jest.fn(() => []),
     refresh: jest.fn(),
   };
+  
   return { ScrollTrigger: st, default: st };
 });
+
+// Assign the refs after mocks are defined
+addLabelSpyRef = mockAddLabelSpy;
+scrollTriggerCreateSpyRef = mockScrollTriggerCreateSpy;
 
 // Mock Three hook to avoid WebGL and provide a stubbed camera/scene used by timelines
 jest.mock('../three/useThreeAirpods', () => {

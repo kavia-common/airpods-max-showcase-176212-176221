@@ -11,6 +11,9 @@ import { registerGsap } from "./registerGsap";
  * INTERNAL: Utility to get sections and labels from DOM dataset.
  */
 function collectChapters() {
+  if (typeof document === 'undefined') {
+    return [];
+  }
   const sections = Array.from(document.querySelectorAll('[data-chapter]'));
   return sections.map((el) => ({
     id: el.getAttribute('data-chapter'),
@@ -49,8 +52,8 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
   const { gsap, ScrollTrigger } = registerGsap();
 
   const chapters = collectChapters();
-  const container = document.querySelector(containerSelector);
-  const pinTarget = document.querySelector(pinTargetSelector);
+  const container = typeof document !== 'undefined' ? document.querySelector(containerSelector) : null;
+  const pinTarget = typeof document !== 'undefined' ? document.querySelector(pinTargetSelector) : null;
 
   // Guard: if DOM not ready or missing targets, do nothing
   if (!container || !pinTarget || !chapters.length) {
@@ -58,7 +61,10 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
   }
 
   // Prefer reduced motion: disable heavy 3D timelines and pinning but keep gentle content fades
-  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let prefersReduced = false;
+  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+    prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
   if (prefersReduced) {
     chapters.forEach((c) => {
       gsap.set(c.el, { opacity: 0, y: 16 });
