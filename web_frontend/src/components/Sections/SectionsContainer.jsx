@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import Section from './Section';
 import { sectionsData } from './SectionsConfig';
 import { createMasterTimeline } from '../../animation/scrollTimelines';
+import Button from '../common/Button';
 
 /**
  * PUBLIC_INTERFACE
@@ -44,38 +45,17 @@ export default function SectionsContainer() {
           Array.isArray(s.cta) && s.cta.length
             ? (
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }} role="group" aria-label={`${s.title} actions`}>
-                {s.cta.map((c, idx) => {
-                  const content = (
-                    <span>
-                      {c.label}
-                    </span>
-                  );
-                  const className = c.type === 'primary' ? 'btn btn-primary' : 'btn';
-                  if (c.href) {
-                    return (
-                      <a
-                        key={`${s.id}-cta-${idx}`}
-                        className={className}
-                        href={c.href}
-                        target={c.external ? '_blank' : undefined}
-                        rel={c.external ? 'noreferrer' : undefined}
-                        aria-label={c.external ? `${c.label} (opens in a new tab)` : c.label}
-                      >
-                        {content}
-                      </a>
-                    );
-                  }
-                  return (
-                    <button
-                      key={`${s.id}-cta-${idx}`}
-                      className={className}
-                      type="button"
-                      aria-label={c.label}
-                    >
-                      {content}
-                    </button>
-                  );
-                })}
+                {s.cta.map((c, idx) => (
+                  <Button
+                    key={`${s.id}-cta-${idx}`}
+                    variant={c.type === 'primary' ? 'primary' : 'default'}
+                    href={c.href}
+                    external={c.external}
+                    aria-label={c.external ? `${c.label} (opens in a new tab)` : c.label}
+                  >
+                    <span>{c.label}</span>
+                  </Button>
+                ))}
               </div>
             )
             : null;
