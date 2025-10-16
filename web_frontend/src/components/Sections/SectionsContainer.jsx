@@ -1,14 +1,41 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Section from './Section';
 import { sectionsData } from './SectionsConfig';
+import { createMasterTimeline } from '../../animation/scrollTimelines';
 
 /**
  * PUBLIC_INTERFACE
  * SectionsContainer stacks the configured sections vertically.
  * It uses semantic main/section structure and keeps the Three.js canvas pinned behind.
+ * Also wires up the GSAP master timeline synchronized to section labels.
  */
 // PUBLIC_INTERFACE
 export default function SectionsContainer() {
+  const cleanupRef = useRef(null);
+
+  useEffect(() => {
+    // Defer timeline creation until after mount to ensure DOM elements exist.
+    // The Three API is accessed via a window-shared reference set by ThreeCanvas.
+    // This avoids prop drilling and keeps the API decoupled.
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!prefersReduced) {
+      const threeApi = window.__threeAirpodsApi || null;
+      cleanupRef.current = createMasterTimeline({ threeApi });
+    }
+
+    return () => {
+      if (cleanupRef.current) {
+        try {
+          cleanupRef.current();
+        } catch (_e) {
+          // ignore
+        }
+        cleanupRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <main className="sections" role="main">
       {/* Hero-like first section may use h1 for the page; handled inside Section via title and aria */}
