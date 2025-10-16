@@ -13,18 +13,18 @@
 }
 
 .hero .headline {
-  font-size: clamp(2rem, 6vw, 4rem);
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
   font-weight: 800;
   letter-spacing: -0.02em;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: var(--color-text);
 }
 
 .hero .sub {
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
-  color: rgba(17,24,39,0.75);
-  max-width: 60ch;
-  margin: 0 auto 1.5rem;
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  color: rgba(17,24,39,0.72);
+  max-width: 70ch;
+  margin: 0.5rem auto 1.5rem;
 }
 
 .badge {
@@ -40,6 +40,35 @@
   margin-bottom: 1rem;
 }
 
+/* Section heading styles */
+.title {
+  font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 2.25vw, 1.125rem);
+  color: rgba(17,24,39,0.78);
+  margin: 0.25rem 0 0.75rem;
+}
+
+.section-body {
+  margin-top: 0.75rem;
+}
+
+/* Card tone variations */
+.card[data-tone="glass"] {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: saturate(180%) blur(6px);
+}
+
+.card[data-tone="surface"] {
+  background: var(--color-surface);
+}
+
+/* Alternate tone rhythm as fallback */
 .sections .section:nth-child(even) .card {
   background: #ffffff;
 }
