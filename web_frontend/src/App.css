@@ -4,29 +4,32 @@
   min-height: 100vh;
 }
 
+/* Hero */
 .hero {
   min-height: 100vh;
   display: grid;
   place-items: center;
   text-align: center;
-  padding: 6rem 1.25rem 4rem;
+  padding: clamp(3rem, 6vw, 6rem) 1.25rem 4rem;
 }
 
 .hero .headline {
-  font-size: clamp(2.5rem, 6vw, 4.25rem);
+  font-size: clamp(2.25rem, 5.5vw, 4.25rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
   color: var(--color-text);
+  text-wrap: balance;
 }
 
 .hero .sub {
-  font-size: clamp(1rem, 2.2vw, 1.25rem);
-  color: rgba(17,24,39,0.72);
-  max-width: 70ch;
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  color: rgba(17,24,39,0.78);
+  max-width: 68ch;
   margin: 0.5rem auto 1.5rem;
 }
 
+/* Eyebrow/badge */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -42,26 +45,28 @@
 
 /* Section heading styles */
 .title {
-  font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+  font-size: clamp(1.35rem, 3vw, 2.25rem);
   font-weight: 700;
   letter-spacing: -0.01em;
   margin-bottom: 0.25rem;
 }
 
 .subtitle {
-  font-size: clamp(1rem, 2.25vw, 1.125rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.125rem);
   color: rgba(17,24,39,0.78);
   margin: 0.25rem 0 0.75rem;
 }
 
 .section-body {
   margin-top: 0.75rem;
+  font-size: var(--step-0);
 }
 
-/* Card tone variations */
+/* Card tone variations with legibility over canvas */
 .card[data-tone="glass"] {
-  background: rgba(255,255,255,0.88);
-  backdrop-filter: saturate(180%) blur(6px);
+  background: rgba(255,255,255,0.92);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  backdrop-filter: saturate(180%) blur(8px);
 }
 
 .card[data-tone="surface"] {
@@ -74,6 +79,17 @@
 }
 
 .sections .section:nth-child(odd) .card {
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: saturate(180%) blur(6px);
+  background: rgba(255,255,255,0.92);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  backdrop-filter: saturate(180%) blur(8px);
+}
+
+/* Mobile adjustments */
+@media (max-width: 639px) {
+  .hero .headline {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+  .badge {
+    font-size: var(--step--1);
+  }
 }

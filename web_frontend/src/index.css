@@ -17,6 +17,18 @@
 
   /* Subtle gradient background */
   --gradient-bg: linear-gradient(180deg, rgba(59,130,246,0.10) 0%, rgba(249,250,251,1) 100%);
+
+  /* Type scale using clamp for responsiveness */
+  --step--1: clamp(0.85rem, 0.82rem + 0.3vw, 0.95rem);
+  --step-0: clamp(1rem, 0.96rem + 0.5vw, 1.125rem);
+  --step-1: clamp(1.125rem, 1.08rem + 0.65vw, 1.25rem);
+  --step-2: clamp(1.35rem, 1.25rem + 1vw, 1.6rem);
+  --step-3: clamp(1.75rem, 1.6rem + 1.6vw, 2.25rem);
+  --step-4: clamp(2.25rem, 2rem + 2.6vw, 3rem);
+  --step-5: clamp(2.75rem, 2.4rem + 3.6vw, 4rem);
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.45);
 }
 
 *,
@@ -36,16 +48,40 @@ body {
   background: var(--gradient-bg), var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: var(--step-0);
+  line-height: 1.5;
 }
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   color: var(--color-text);
   margin: 0 0 0.5rem;
+  line-height: 1.15;
 }
+h1 { font-size: var(--step-5); letter-spacing: -0.02em; }
+h2 { font-size: var(--step-4); letter-spacing: -0.01em; }
+h3 { font-size: var(--step-3); }
 p {
-  line-height: 1.6;
+  line-height: 1.7;
   color: rgba(17,24,39,0.9);
+  font-size: var(--step-0);
+}
+
+/* Accessibility: focus-visible ring with strong contrast on light backgrounds */
+:where(a, button, [role="button"], input, select, textarea):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 8px;
+}
+
+/* Reduced motion: soften transitions and disable transforms */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Layout utilities */
@@ -78,17 +114,18 @@ p {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 4rem 1.25rem;
+  padding: clamp(2.5rem, 4vw, 4rem) 1.25rem;
   background: transparent;
 }
 
+/* Overlay card: ensure strong legibility over canvas */
 .section .card {
-  background: var(--color-surface);
+  background: color-mix(in oklab, var(--color-surface) 92%, white);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  padding: 2rem;
+  padding: clamp(1.25rem, 2vw, 2rem);
   width: 100%;
-  max-width: 800px;
+  max-width: min(800px, 92vw);
   border: 1px solid rgba(17,24,39,0.06);
 }
 
@@ -97,13 +134,13 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.125rem;
+  padding: 0.7rem 1.1rem;
   border-radius: 9999px;
-  border: 1px solid rgba(17,24,39,0.08);
+  border: 1px solid rgba(17,24,39,0.12);
   background: #ffffff;
   color: var(--color-text);
   box-shadow: var(--shadow-sm);
-  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, background-color 200ms ease;
 }
 .btn:hover {
   transform: translateY(-1px);
@@ -115,6 +152,9 @@ p {
   color: #fff;
   border-color: rgba(37,99,235,0.8);
 }
+.btn:focus-visible {
+  box-shadow: var(--focus-ring);
+}
 
 /* Helper spacing */
 .spacer-xxl { height: 20vh; }
@@ -122,4 +162,23 @@ p {
 /* Code font */
 code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1023px) {
+  .section .card {
+    max-width: min(720px, 94vw);
+  }
+}
+@media (max-width: 639px) {
+  .section {
+    min-height: 90vh;
+  }
+  .section .card {
+    padding: 1rem 1rem 1.25rem;
+    max-width: 92vw;
+  }
+  .btn {
+    width: auto;
+  }
 }

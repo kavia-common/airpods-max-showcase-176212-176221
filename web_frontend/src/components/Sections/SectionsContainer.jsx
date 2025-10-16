@@ -37,13 +37,13 @@ export default function SectionsContainer() {
   }, []);
 
   return (
-    <main className="sections" role="main">
+    <main className="sections" role="main" aria-label="AirPods Max showcase sections">
       {/* Hero-like first section may use h1 for the page; handled inside Section via title and aria */}
       {sectionsData.map((s) => {
         const ctas =
           Array.isArray(s.cta) && s.cta.length
             ? (
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }} role="group" aria-label={`${s.title} actions`}>
                 {s.cta.map((c, idx) => {
                   const content = (
                     <span>
@@ -59,13 +59,19 @@ export default function SectionsContainer() {
                         href={c.href}
                         target={c.external ? '_blank' : undefined}
                         rel={c.external ? 'noreferrer' : undefined}
+                        aria-label={c.external ? `${c.label} (opens in a new tab)` : c.label}
                       >
                         {content}
                       </a>
                     );
                   }
                   return (
-                    <button key={`${s.id}-cta-${idx}`} className={className} type="button">
+                    <button
+                      key={`${s.id}-cta-${idx}`}
+                      className={className}
+                      type="button"
+                      aria-label={c.label}
+                    >
                       {content}
                     </button>
                   );

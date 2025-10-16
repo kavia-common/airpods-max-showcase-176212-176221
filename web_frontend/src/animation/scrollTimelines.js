@@ -48,14 +48,6 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
    */
   const { gsap, ScrollTrigger } = registerGsap();
 
-  // Prefer reduced motion: disable scroll-linked animations and pinning
-  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (prefersReduced) {
-    // Ensure no pinning, but still set a minimal ScrollTrigger to keep layout predictable if needed
-    // We simply return a noop cleanup.
-    return () => {};
-  }
-
   const chapters = collectChapters();
   const container = document.querySelector(containerSelector);
   const pinTarget = document.querySelector(pinTargetSelector);
@@ -63,6 +55,30 @@ export function createMasterTimeline({ threeApi, pinTargetSelector = ".canvas-la
   // Guard: if DOM not ready or missing targets, do nothing
   if (!container || !pinTarget || !chapters.length) {
     return () => {};
+  }
+
+  // Prefer reduced motion: disable heavy 3D timelines and pinning but keep gentle content fades
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReduced) {
+    // Minimal content visibility progression without pinning or scrubbed 3D
+    chapters.forEach((c, i) => {
+      // Start all sections transparent; fade in as they approach viewport
+      gsap.set(c.el, { opacity: 0, y: 16 });
+      ScrollTrigger.create({
+        trigger: c.el,
+        start: "top 80%",
+        end: "top 20%",
+        onEnter: () => gsap.to(c.el, { opacity: 1, y: 0, duration: 0.4, ease: "power1.out" }),
+        onEnterBack: () => gsap.to(c.el, { opacity: 1, y: 0, duration: 0.4, ease: "power1.out" }),
+      });
+    });
+    return () => {
+      // ScrollTriggers are auto-killed on refresh; no persistent timelines created here
+      ScrollTrigger.getAll().forEach((st) => {
+        // only kill the ones we created for sections
+        if (chapters.find((c) => c.el === st.trigger)) st.kill();
+      });
+    };
   }
 
   // Prepare Three objects and fallback placeholders

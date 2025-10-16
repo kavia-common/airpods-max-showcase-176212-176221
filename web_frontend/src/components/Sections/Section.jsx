@@ -34,15 +34,16 @@ export default function Section({
         style={{
           ...(tone === 'glass'
             ? {
-                background: 'rgba(255,255,255,0.88)',
-                backdropFilter: 'saturate(180%) blur(6px)',
+                background: 'rgba(255,255,255,0.92)',
+                backdropFilter: 'saturate(180%) blur(8px)',
+                WebkitBackdropFilter: 'saturate(180%) blur(8px)',
               }
             : {}),
         }}
       >
-        <header>
+        <header aria-describedby={subtitle ? `${id}-subtitle` : undefined}>
           {eyebrow ? (
-            <p className="badge" aria-label="section eyebrow">
+            <p className="badge" aria-label="Section category">
               {eyebrow}
             </p>
           ) : null}
@@ -51,13 +52,13 @@ export default function Section({
               {title}
             </h2>
           ) : null}
-          {subtitle ? <p className="subtitle">{subtitle}</p> : null}
+          {subtitle ? <p className="subtitle" id={`${id}-subtitle`}>{subtitle}</p> : null}
         </header>
 
         {children ? <div className="section-body">{children}</div> : null}
 
         {ctaArea ? (
-          <div className="section-cta" role="group" aria-label="section actions">
+          <div className="section-cta" role="group" aria-label="Section actions">
             {ctaArea}
           </div>
         ) : null}
