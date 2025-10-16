@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import './App.css';
 import './index.css';
 import { registerGsapPlugins } from './utils/gsapSetup';
+import ThreeCanvas from './components/ThreeCanvas';
 
 // PUBLIC_INTERFACE
 function App() {
@@ -12,9 +13,10 @@ function App() {
 
   return (
     <div className="App">
-      {/* Fixed full-viewport canvas layer placeholder */}
+      {/* Fixed full-viewport canvas layer */}
       <div className="canvas-layer" aria-hidden="true">
-        {/* Three.js Canvas placeholder – to be implemented in later steps */}
+        {/* Model path is optional; fallback geometry will render if not present */}
+        <ThreeCanvas modelUrl="/assets/airpods-max.glb" />
       </div>
 
       {/* Overlay sections that scroll over the fixed canvas */}
