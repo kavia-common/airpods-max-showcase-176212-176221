@@ -1,104 +1,70 @@
-# Lightweight React Template for KAVIA
+# AirPods Max Scrollytelling Web Frontend
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+This single‑page React app delivers a Three.js + GSAP scrollytelling experience styled with the Ocean Professional theme. A fixed 3D canvas stays pinned behind text sections that advance animations as you scroll, with accessibility and performance optimizations applied.
 
-## Features
+## Quick start
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+1. Install and run:
+   - cd web_frontend
+   - npm install
+   - npm start
 
-## Getting Started
+2. Open the preview:
+   - The dev server auto‑starts on http://localhost:3000 (port 3000).
 
-In the project directory, you can run:
+3. Run tests:
+   - CI=true npm test -- --watchAll=false
 
-### `npm start`
+## Add the 3D model and optional DRACO decoders
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The app will render a graceful fallback object if the model is missing, but to see the full product experience:
 
-### `npm test`
+- Place the GLB file at:
+  - web_frontend/public/models/airpods-max/airpods-max.glb
 
-Launches the test runner in interactive watch mode.
+- Optional: add DRACO decoder files for compressed models at:
+  - web_frontend/public/draco/
+  Typical files include:
+  - draco_decoder.js
+  - draco_wasm_wrapper.js
+  - draco_decoder.wasm
 
-### `npm run build`
+The loader resolves paths as follows:
+- Model URL defaults to /models/airpods-max/airpods-max.glb unless overridden.
+- DRACO path defaults to /draco/ and should end with a trailing slash.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Environment variables
 
-## 3D Model and Draco Assets
+Copy .env.example to .env in web_frontend to override defaults if needed.
 
-To enable the AirPods Max 3D model:
+- REACT_APP_MODEL_BASE_URL
+  Absolute or relative URL to the GLB. Default: /models/airpods-max/airpods-max.glb.
+- REACT_APP_DRACO_PATH
+  Directory path for DRACO decoder files. Default: /draco/. Ensure it ends with a slash.
 
-1. Place your GLB file at:
-   - `public/models/airpods-max/airpods-max.glb`
+These values are read at build time by create‑react‑app and used by src/three/loadModel.js.
 
-2. (Optional) If your model uses DRACO compression, place the DRACO decoder files in:
-   - `public/draco/`
-   Typical files include:
-   - `draco_decoder.js`
-   - `draco_wasm_wrapper.js`
-   - `draco_decoder.wasm`
+## Verify scroll‑driven animations
 
-3. Environment variables (optional):
-   - `REACT_APP_MODEL_BASE_URL` (default: `/models/airpods-max/airpods-max.glb`)
-   - `REACT_APP_DRACO_PATH` (default: `/draco/`)
-   Copy `.env.example` to `.env` and update if your paths differ.
+- Start the dev server and scroll the page. The canvas stays pinned while sections progress.
+- Labels defined in sections (intro, design, performance, timing, features, cta) are wired to the GSAP master timeline to drive camera moves and part transforms.
+- If prefers‑reduced‑motion is enabled at the OS/browser level, heavy 3D timelines and pinning are disabled and content fades in gently instead.
 
-4. Graceful fallback:
-   - If the model is missing or fails to load, the app will render a placeholder object so the page remains functional.
+## Performance notes
 
-## Customization
+- Device Pixel Ratio cap: The renderer caps DPR to reduce overdraw on HiDPI screens for a smooth experience (see MAX_PIXEL_RATIO in src/three/constants.js).
+- Render loop pause: The app pauses the RAF when the tab is hidden and resumes on return.
+- Frustum culling and cleanup: Geometry and textures are disposed on unmount to prevent leaks.
 
-### Colors
+## Development tips
 
-The main brand colors are defined as CSS variables in `src/App.css`:
+- Theme: The Ocean Professional theme lives in src/theme.css and is applied globally via CSS variables with modern, minimalist styling.
+- Model parts: The timeline uses safe fallbacks if named sub‑objects are not found. You can extend window.__threeAirpodsApi.getModelParts() in src/components/ThreeCanvas.jsx to return specific nodes (e.g., headband, cups) for more granular animations.
+- Testing: Unit tests mock heavy WebGL and GSAP modules to keep CI fast. Use CI=true npm test -- --watchAll=false to run in non‑interactive mode.
+- Draco: If you host DRACO decoders on a CDN, point REACT_APP_DRACO_PATH to that directory URL and include a trailing slash.
 
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
-```
+## Troubleshooting
 
-### Components
-
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
-
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
-
-## Learn More
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Missing model or 404s: Confirm the GLB is at public/models/airpods-max/airpods-max.glb or adjust REACT_APP_MODEL_BASE_URL.
+- DRACO decode errors: Ensure public/draco/ contains the decoder files and that REACT_APP_DRACO_PATH ends with a slash.
+- Reduced motion: If animations are not pinning or playing, check your OS/browser prefers‑reduced‑motion setting.
