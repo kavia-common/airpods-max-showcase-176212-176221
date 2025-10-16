@@ -1,0 +1,4 @@
+{
+    "command": "npm run test",
+    "working_directory": "/home/kavia/workspace/code-generation/airpods-max-showcase-176212-176221/web_frontend"
+}
