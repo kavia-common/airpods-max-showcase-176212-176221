@@ -1,13 +1,125 @@
+/* Ocean Professional Theme Tokens */
+:root {
+  --color-primary: #2563EB;   /* blue-600 */
+  --color-secondary: #F59E0B; /* amber-500 */
+  --color-bg: #f9fafb;        /* gray-50 */
+  --color-surface: #ffffff;   /* white */
+  --color-text: #111827;      /* gray-900 */
+  --color-error: #EF4444;
+
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 8px 24px rgba(17,24,39,0.08);
+
+  --container-max: 1200px;
+
+  /* Subtle gradient background */
+  --gradient-bg: linear-gradient(180deg, rgba(59,130,246,0.10) 0%, rgba(249,250,251,1) 100%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  color: var(--color-text);
+  background: var(--gradient-bg), var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text);
+  margin: 0 0 0.5rem;
+}
+p {
+  line-height: 1.6;
+  color: rgba(17,24,39,0.9);
+}
+
+/* Layout utilities */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* Fixed full-viewport canvas layer */
+.canvas-layer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* allow scroll/interaction on overlays */
+  z-index: 0;
+  background: transparent;
+}
+
+/* Overlay sections container */
+.sections {
+  position: relative;
+  z-index: 1;
+}
+
+/* Section base styles for scrollytelling */
+.section {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 4rem 1.25rem;
+  background: transparent;
+}
+
+.section .card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+  width: 100%;
+  max-width: 800px;
+  border: 1px solid rgba(17,24,39,0.06);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.125rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(17,24,39,0.08);
+  background: #ffffff;
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(17,24,39,0.10);
+  border-color: rgba(37,99,235,0.35);
+}
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: rgba(37,99,235,0.8);
+}
+
+/* Helper spacing */
+.spacer-xxl { height: 20vh; }
+
+/* Code font */
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 }

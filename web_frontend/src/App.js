@@ -1,47 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
+import React, { useEffect } from 'react';
 import './App.css';
+import './index.css';
+import { registerGsapPlugins } from './utils/gsapSetup';
 
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState('light');
-
-  // Effect to apply theme to document element
+  // Initialize GSAP plugins once
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
+    registerGsapPlugins();
+  }, []);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {/* Fixed full-viewport canvas layer placeholder */}
+      <div className="canvas-layer" aria-hidden="true">
+        {/* Three.js Canvas placeholder – to be implemented in later steps */}
+      </div>
+
+      {/* Overlay sections that scroll over the fixed canvas */}
+      <main className="sections">
+        <section className="hero section">
+          <div className="container">
+            <span className="badge">Ocean Professional</span>
+            <h1 className="headline">AirPods Max Showcase</h1>
+            <p className="sub">
+              A premium, scroll-driven experience featuring a high-fidelity 3D product reveal powered by Three.js and GSAP ScrollTrigger.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', marginTop: '1rem' }}>
+              <button className="btn btn-primary">Get Started</button>
+              <a className="btn" href="https://greensock.com/scrolltrigger/" target="_blank" rel="noreferrer">GSAP Docs</a>
+            </div>
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="card container">
+            <h2>Scrollytelling Ready</h2>
+            <p>
+              The layout is prepared with a fixed canvas background and scrollable overlay sections.
+              Animations and 3D content will be integrated in subsequent steps.
+            </p>
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="card container">
+            <h2>Ocean Professional Theme</h2>
+            <p>
+              This app uses a modern theme with a subtle gradient background, blue and amber accents, and crisp typography.
+            </p>
+          </div>
+        </section>
+
+        <div className="spacer-xxl" />
+      </main>
     </div>
   );
 }
